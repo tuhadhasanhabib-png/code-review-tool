@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Code Review Specialist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(124,58,237,0.15));
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(24px, 5vw, 38px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .subtitle { color: var(--muted); font-size: 14px; font-family: 'JetBrains Mono', monospace; }
+  .context-bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+  .tag {
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .input-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .input-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; }
+  .dot-group { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #10b981; }
+  textarea {
+    width: 100%;
+    min-height: 200px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+  }
+  .btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
+  .btn { flex: 1; padding: 14px 20px; border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .loading { display: none; text-align: center; padding: 40px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .result-section { display: none; }
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 20px; }
+  .score-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; flex-shrink: 0; border: 3px solid; }
+  .score-good { border-color: var(--success); color: var(--success); background: rgba(16,185,129,0.08); }
+  .score-warn { border-color: var(--warning); color: var(--warning); background: rgba(245,158,11,0.08); }
+  .score-bad { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.08); }
+  .score-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .score-info p { font-size: 13px; color: var(--muted); }
+  .review-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; overflow: hidden; }
+  .review-block-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); cursor: pointer; }
+  .review-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .icon-error { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .icon-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+  .icon-ok { background: rgba(16,185,129,0.15); color: var(--success); }
+  .icon-tip { background: rgba(0,212,255,0.15); color: var(--accent); }
+  .review-title { font-size: 14px; font-weight: 700; flex: 1; }
+  .review-body { padding: 16px; font-size: 13px; line-height: 1.75; color: #cbd5e1; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
+  @media (max-width: 600px) { .btn-row { flex-direction: column; } .score-card { flex-direction: column; text-align: center; } }
+</style>
+</head><body>
+<div class="container">
+  <div class="header">
+    <div class="badge">🤖 AI-Powered</div>
+    <h1>Python Code Review<br>Specialist</h1>
+    <p class="subtitle">// B2B Workflow · LLM Agent · Automation</p>
+  </div>
+  <div class="context-bar">
+    <span class="tag">B2B Process Automation</span>
+    <span class="tag">LLM Agent Dev</span>
+    <span class="tag">Workflow Integration</span>
+    <span class="tag">Python Debugging</span>
+  </div>
+  <div class="input-section">
+    <div class="input-header">
+      <span class="input-label">Python Code</span>
+      <div class="dot-group">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+      </div>
+    </div>
+    <textarea id="codeInput" placeholder="# এখানে Claude এর দেওয়া Python কোড paste করো..."></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="reviewBtn" onclick="reviewCode()">🔍 কোড রিভিউ করো</button>
+    <button class="btn btn-secondary" onclick="clearAll()">🗑 Clear</button>
+  </div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>কোড বিশ্লেষণ হচ্ছে...</p>
+  </div>
+  <div class="result-section" id="result"></div>
+</div><script>
+async function reviewCode() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (!code) { alert('কোড paste করো আগে!'); return; }
+  const btn = document.getElementById('reviewBtn');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+  btn.disabled = true;
+  loading.style.display = 'block';
+  result.style.display = 'none';
+  result.innerHTML = '';
+  const systemPrompt = `তুমি একজন expert Python Code Review Specialist। B2B process workflow automation এবং AI LLM agent development এর জন্য লেখা Python কোড রিভিউ করো। বাংলায় উত্তর দাও। শুধু JSON দাও:\n{"score":0-100,"verdict":"সারসংক্ষেপ","errors":[{"title":"","detail":""}],"warnings":[{"title":"","detail":""}],"good_parts":[{"title":"","detail":""}],"b2b_tips":[{"title":"","detail":""}]}`;
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: `এই Python কোডটি রিভিউ করো:\n\n${code}` }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    renderResult(parsed);
+  } catch (err) {
+    result.style.display = 'block';
+    result.innerHTML = `<div style="color:#ef4444;padding:20px;">❌ সমস্যা হয়েছে: ${err.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+function renderResult(data) {
+  const result = document.getElementById('result');
+  const scoreClass = data.score >= 75 ? 'score-good' : data.score >= 45 ? 'score-warn' : 'score-bad';
+  const scoreEmoji = data.score >= 75 ? '✅' : data.score >= 45 ? '⚠️' : '❌';
+  let html = `<div class="score-card"><div class="score-circle ${scoreClass}">${data.score}</div><div class="score-info"><h3>${scoreEmoji} ${data.verdict}</h3><p>Score: ${data.score}/100 | ${data.errors?.length||0} Error | ${data.warnings?.length||0} Warning | ${data.good_parts?.length||0} ভালো দিক</p></div></div>`;
+  (data.errors||[]).forEach(e => html += block('icon-error','🔴',e.title,e.detail));
+  (data.warnings||[]).forEach(w => html += block('icon-warning','🟡',w.title,w.detail));
+  (data.good_parts||[]).forEach(g => html += block('icon-ok','✅',g.title,g.detail));
+  (data.b2b_tips||[]).forEach(t => html += block('icon-tip','💡',t.title,t.detail));
+  result.innerHTML = html;
+  result.style.display = 'block';
+}
+function block(iconClass, emoji, title, detail) {
+  return `<div class="review-block"><div class="review-block-header" onclick="toggleBlock(this)"><div class="review-icon ${iconClass}">${emoji}</div><div class="review-title">${title}</div><span style="color:#64748b">▼</span></div><div class="review-body">${detail}</div></div>`;
+}
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span');
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  arrow.textContent = body.style.display === 'none' ? '▶' : '▼';
+}
+function clearAll() {
+  document.getElementById('codeInput').value = '';
+  const result = document.getElementById('result');
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>
